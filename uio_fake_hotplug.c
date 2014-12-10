@@ -25,7 +25,7 @@ static int msec_uio_intr_delay = 1000; // 1 sec
 void unregister_uio(void)
 {
     pr_info("Delting fake interrupt timer\n");
-    del_timer(&fake_intr_timer);
+    del_timer_sync(&fake_intr_timer);
     if (info) {
         pr_info("Unregistering uio\n");
         uio_unregister_device(info);
@@ -130,7 +130,7 @@ static void __exit uio_fake_hotplug_cleanup(void)
     pr_info("Cleaning up module.\n");
 
     if (ts) {
-        del_timer(&fake_intr_timer);
+        del_timer_sync(&fake_intr_timer);
         kthread_stop(ts);
         unregister_uio();
     }
