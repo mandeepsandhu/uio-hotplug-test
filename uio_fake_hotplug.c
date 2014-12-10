@@ -12,7 +12,7 @@
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Mandeep Sandhu");
-MODULE_DESCRIPTION("Dummy UIO kernel driver");
+MODULE_DESCRIPTION("UIO fake hotplug driver");
 
 static struct uio_info* info;
 static struct platform_device *pdev;
@@ -61,23 +61,22 @@ void fake_intr_timer_cb(unsigned long data)
                jiffies + msecs_to_jiffies(msec_uio_intr_delay));
 }
 
-static int uio_dummy_open(struct uio_info *info, struct inode *inode)
+static int uio_fake_hotplug_open(struct uio_info *info, struct inode *inode)
 {
     pr_info("%s called\n", __FUNCTION__);
     return 0;
 }
 
-static int uio_dummy_release(struct uio_info *info, struct inode *inode)
+static int uio_fake_hotplug_release(struct uio_info *info, struct inode *inode)
 {
     pr_info("%s called\n", __FUNCTION__);
     return 0;
 }
 
-static int __init uio_dummy_init(void)
+static int __init uio_fake_hotplug_init(void)
 {
-    printk(KERN_INFO "Dummy uio driver!\n");
 
-    pdev = platform_device_register_simple("dummy_platform_device",
+    pdev = platform_device_register_simple("uio_fake_hotplug_platform_device",
                                             0, NULL, 0);
     if (IS_ERR(pdev)) {
         pr_err("Failed to register platform device.\n");
@@ -89,7 +88,7 @@ static int __init uio_dummy_init(void)
     if (!info)
         return -ENOMEM;
 
-    info->name = "dummy_uio_driver";
+    info->name = "uio_fake_hotplug_driver";
     info->version = "0.1";
     info->mem[0].addr = (phys_addr_t) kzalloc(PAGE_SIZE, GFP_ATOMIC);
     if (!info->mem[0].addr)
@@ -98,17 +97,14 @@ static int __init uio_dummy_init(void)
     info->mem[0].size = PAGE_SIZE;
     info->irq = UIO_IRQ_CUSTOM;
     info->handler = 0;
-    info->open = uio_dummy_open;
-    info->release = uio_dummy_release;
+    info->open = uio_fake_hotplug_open;
+    info->release = uio_fake_hotplug_release;
 	
     if(uio_register_device(&pdev->dev, info)) {
         pr_err("Unable to register UIO device!\n");
         goto devmem;
-    } else {
-        pr_info("Successfully registered UIO device!\n");
     }
 
-    pr_info("Starting uio unreg kthread\n");
     ts = kthread_run(kthread_fn, NULL, "uio_unreg_kthread");
 
     setup_timer(&fake_intr_timer, fake_intr_timer_cb, 0 );
@@ -117,6 +113,8 @@ static int __init uio_dummy_init(void)
         pr_err("Error setting up fake interrupt timer");
         goto devmem;
     }
+
+    pr_info("Fake uio hotplug driver loaded\n");
     return 0;
 
 devmem:
@@ -127,9 +125,9 @@ uiomem:
     return -ENODEV;
 }
 
-static void __exit uio_dummy_cleanup(void)
+static void __exit uio_fake_hotplug_cleanup(void)
 {
-    printk(KERN_INFO "Cleaning up module.\n");
+    pr_info("Cleaning up module.\n");
 
     if (ts) {
         del_timer(&fake_intr_timer);
@@ -141,5 +139,5 @@ static void __exit uio_dummy_cleanup(void)
         platform_device_unregister(pdev);
 }
 
-module_init(uio_dummy_init);
-module_exit(uio_dummy_cleanup);
+module_init(uio_fake_hotplug_init);
+module_exit(uio_fake_hotplug_cleanup);

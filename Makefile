@@ -1,6 +1,6 @@
 CC=gcc
 
-obj-m += uio_dummy.o
+obj-m += uio_fake_hotplug.o
 
 all: kmod app
 

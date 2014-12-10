@@ -27,3 +27,11 @@
 *.i*86
 *.x86_64
 *.hex
+
+# Kmod related
+.tmp_versions
+Module.symvers
+modules.order
+uio_user
+*.mod.*
+*.cmd

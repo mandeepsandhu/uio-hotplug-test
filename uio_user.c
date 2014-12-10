@@ -1,12 +1,8 @@
-#include <stdlib.h>
 #include <stdio.h>
-#include <unistd.h>
-#include <sys/types.h>
 #include <sys/mman.h>
 #include <sys/select.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <signal.h>
 #include <string.h>
 
 #define WAIT_FOR_INTERRUPT
